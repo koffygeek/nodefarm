@@ -1,3 +1,4 @@
+const { log } = require("console");
 const fs = require("fs");
 
 const http = require("http");
@@ -16,6 +17,7 @@ const replaceTemplate = (template,item) =>{
             output = output.replace(/{%FROM%}/g, item.from);
             output = output.replace(/{%NUTRIENTS%}/g, item.nutrients);
             output = output.replace(/{%DESCRIPTION%}/g, item.description);
+            output = output.replace(/{%ID%}/g, item.id);
 
             if(!item.organic){
             output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic');
@@ -38,8 +40,10 @@ let dataObjc = JSON.parse(data)
 
 
 const server = http.createServer((request,response)=>{
-   const pathName = request.url
-   if(pathName === '/' || pathName === '/overview'){
+    const  {query,pathname} = url.parse(request.url,true)
+   
+
+   if(pathname === '/' || pathname === '/overview'){
 
     response.writeHead(200,{
         "Content-type" : "text-html",
@@ -54,12 +58,17 @@ const server = http.createServer((request,response)=>{
     response.end(output)
 
 
-   }else if (pathName === '/product'){
+   }else if (pathname === '/product'){
     response.writeHead(200,{
         "Content-type" : "type-json"
     })
 
-    response.end(templateProduct)
+
+    const myproduct = dataObjc[query.id]
+
+    const output = replaceTemplate(templateProduct,myproduct)
+    
+    response.end(output)
 
 
    }else{
