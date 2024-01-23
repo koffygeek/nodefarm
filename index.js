@@ -17,6 +17,10 @@ const replaceTemplate = (template,item) =>{
             output = output.replace(/{%NUTRIENTS%}/g, item.nutrients);
             output = output.replace(/{%DESCRIPTION%}/g, item.description);
 
+            if(!item.organic){
+            output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic');
+
+        }
 
 return output;
 
@@ -36,17 +40,18 @@ let dataObjc = JSON.parse(data)
 const server = http.createServer((request,response)=>{
    const pathName = request.url
    if(pathName === '/' || pathName === '/overview'){
-    response.writeHead(200,{
-        "Content-type" : "text-html",
-    })
-    
-    response.end(templateCard)
 
     response.writeHead(200,{
         "Content-type" : "text-html",
     })
 
-    response.end(templateOverview)
+        const cardHtml = dataObjc.map(el => replaceTemplate(templateCard,el)).join('')
+
+        // console.log(cardHtml)
+
+        const output = templateOverview.replace("{%CARD%}",cardHtml)
+
+    response.end(output)
 
 
    }else if (pathName === '/product'){
